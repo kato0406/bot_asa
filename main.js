@@ -119,7 +119,5 @@ const bot = {
 }
 
 function doGet() {
-  const test = service.getProperty('AGENDA_URL')
-
   return bot.exec()
 }
