@@ -6,7 +6,6 @@ const bot = {
     backlogUrl: 'https://valeur.backlog.jp/FindIssueAllOver.action?sort=LIMIT_DATE&order=false&simpleSearch=false&allOver=true&startDate.unspecified=false&limitDate.unspecified=false&',
     meetUrl: 'https://meet.google.com/grq-auge-riw',
     agendaUrl: 'https://wollllll.github.io/asa_bot_desu/',
-      // agendaUrl: 'https://script.google.com/a/macros/valeur3.com/s/AKfycbxS6a7f3yizGDojAne8oQT2EjnoYpIyxUOMYX4R-pyyBi5yS_-lZJvEjMA6hqrEJUJ2WQ/exec',
     workDays: [1, 2, 3, 4, 5],
     calendar: CalendarApp.getCalendarById('ja.japanese#holiday@group.v.calendar.google.com')
   },
