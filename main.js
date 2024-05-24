@@ -1,14 +1,4 @@
 const bot = {
-  config: {
-    chatworkApiKey: '255b0c3bf5bc21a7acf3a11521c83149',
-    chatworkRoomId: '178143302',
-    backlogApiKey: 'kX34HN14qc4h7paFqtm97AIzjB76Ugc0cZnRAFDSsQfKIsjmw7UA9IsDCaratBZz',
-    backlogUrl: 'https://valeur.backlog.jp/FindIssueAllOver.action?sort=LIMIT_DATE&order=false&simpleSearch=false&allOver=true&startDate.unspecified=false&limitDate.unspecified=false&',
-    meetUrl: 'https://meet.google.com/grq-auge-riw',
-    agendaUrl: 'https://wollllll.github.io/asa_bot_desu/',
-    workDays: [1, 2, 3, 4, 5],
-    calendar: CalendarApp.getCalendarById('ja.japanese#holiday@group.v.calendar.google.com')
-  },
   methods: {
     isMonday() {
       return dayjs.dayjs().day() === 1
@@ -17,12 +7,12 @@ const bot = {
       return sheet.getRange(sheet.getMaxRows(), column).getNextDataCell(SpreadsheetApp.Direction.UP).getRow()
     },
     sync() {
-      const response = JSON.parse(UrlFetchApp.fetch(`https://valeur.backlog.jp/api/v2/projects?apiKey=${bot.config.backlogApiKey}`).getContentText())
+      const response = JSON.parse(UrlFetchApp.fetch(`https://valeur.backlog.jp/api/v2/projects?apiKey=${service.getProperty('BACKLOG_API_KEY')}`).getContentText())
       const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
       const projects = response.map(project => [project.id, project.name])
       const statuses = projects.map(project => {
         const [id, name] = project
-        const response = JSON.parse(UrlFetchApp.fetch(`https://valeur.backlog.jp/api/v2/projects/${id}/statuses?apiKey=${bot.config.backlogApiKey}`))
+        const response = JSON.parse(UrlFetchApp.fetch(`https://valeur.backlog.jp/api/v2/projects/${id}/statuses?apiKey=${service.getProperty('BACKLOG_API_KEY')}`))
 
         return response.map(status => {
           return [
@@ -69,8 +59,8 @@ const bot = {
       })
       
       return {
-        url: `${bot.config.backlogUrl}${projectIds.map(id => `projectId=${id}&`).join('')}${statusIds.map(id => `statusId=${id}&`).join('')}`,
-        mondayUrl: `${bot.config.backlogUrl}${projectIds.map(id => `projectId=${id}&`).join('')}${completeStatusIds.map(id => `statusId=${id}&`).join('')}`
+        url: `${service.getProperty('BACKLOG_URL')}${projectIds.map(id => `projectId=${id}&`).join('')}${statusIds.map(id => `statusId=${id}&`).join('')}`,
+        mondayUrl: `${service.getProperty('BACKLOG_URL')}${projectIds.map(id => `projectId=${id}&`).join('')}${completeStatusIds.map(id => `statusId=${id}&`).join('')}`
       }
     },
     formatDate(date) {
@@ -86,13 +76,14 @@ const bot = {
       })
       const [name] = bot.methods.getTargetUser(users)
 
-      return `[toall]\n朝会bot\n部屋：${bot.config.meetUrl}\n進行：${name}\n\n朝会目次\n${bot.config.agendaUrl}`
+      return `[toall]\n朝会bot\n部屋：${service.getProperty('MEET_URL')}\n進行：${name}\n\n朝会目次\n${service.getProperty('AGENDA_URL')}`
     },
     getTargetUser(users) {
       return users[Math.floor(Math.random() * users.length)]
     },
     skipHoliday(date) {
-      if (bot.config.workDays.includes(date.day())) return date
+      const workDays = [1, 2, 3, 4, 5]
+      if (workDays.includes(date.day())) return date
 
       return bot.methods.addDay(date.add(1, 'd'))
     },
@@ -120,13 +111,15 @@ const bot = {
     bot.methods.sync()
 
     // chatwork
-    ChatWorkClient.factory({token: bot.config.chatworkApiKey}).sendMessage({
-      room_id: bot.config.chatworkRoomId,
+    ChatWorkClient.factory({token: service.getProperty('CHATWORK_API_KEY')}).sendMessage({
+      room_id: service.getProperty('CHATWORK_ROOM_ID'),
       body: bot.methods.generateBody()
     })
   }
 }
 
 function doGet() {
+  const test = service.getProperty('AGENDA_URL')
+
   return bot.exec()
 }
